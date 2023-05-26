@@ -17,7 +17,11 @@ import re
 sshname = "admin"
 sshpass = "passw0rd"
 
-macs = [
+usw_flex_mini_mac_prefix = ["74:ac:b9",]
+uap_ac_iw_mac_prefix = ["78:45:58",]
+us_16_150w_mac_prefix = ["68:d7:9a",]
+
+macs_prefix = [
     "f0:9f:c2",
     "44:d9:e7",
     "04:18:d6",
@@ -33,6 +37,8 @@ macs = [
     "78:8a:20",
     "b4:fb:e4",
 ]
+
+macs = mac_prefix + usw_flex_mini_mac_prefix + uap_ac_iw_mac_prefix + us_16_150w_mac_prefix
 
 
 class bcolors:

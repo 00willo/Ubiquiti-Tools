@@ -61,7 +61,8 @@ The devices I have tested is the following.
  - UAP-LR
  - UAP-AC-LR
  - UAP-Pro
- - UAP‑AC‑PRO
+ - UAP-AC-PRO
+ - UAP-AC-IW
  - UAP-Outdoor+
  - mPort
  - NanoBeamM5
@@ -71,6 +72,7 @@ The devices I have tested is the following.
  - US-24-250W
  - USG
  - USG‑PRO‑4
+ - USW-Flex-Mini
 
 ### Example
 
