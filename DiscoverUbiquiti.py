@@ -31,16 +31,16 @@ macs = [
     "74:83:c2",
     "18:e8:29",
     "78:8a:20",
-    "b4:fb:e4"
-    ]
-
+    "b4:fb:e4",
+]
 
 
 class bcolors:
-    OKGREEN = '\033[92m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    HEADER = '\033[93m'
+    OKGREEN = "\033[92m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    HEADER = "\033[93m"
+
 
 def ping_sweep(network):
     print()
@@ -53,8 +53,8 @@ def ping_sweep(network):
         if "done" in line:
             print(line)
 
-def print_ubnt():
 
+def print_ubnt():
     print()
     print("Ubiquiti Devices\n")
 
@@ -63,15 +63,12 @@ def print_ubnt():
     splitted = []
     splitted = arp.decode().split("\n")
 
-    FORMAT = '%-16s %-18s %-16s %-18s %-12s %-45s'
-    print(FORMAT % ('IP', 'MAC', 'Model', 'Hostname', 'Version', 'Status'))
+    FORMAT = "%-16s %-18s %-16s %-18s %-12s %-45s"
+    print(FORMAT % ("IP", "MAC", "Model", "Hostname", "Version", "Status"))
 
     colorcount = 1
 
-
-
     for line in splitted:
-
         bool = False
 
         for mac in macs:
@@ -79,8 +76,8 @@ def print_ubnt():
                 bool = True
 
         if bool:
-            ip = re.search(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', line, re.I).group()
-            mac = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', line, re.I).group()
+            ip = re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", line, re.I).group()
+            mac = re.search(r"([0-9A-F]{2}[:-]){5}([0-9A-F]{2})", line, re.I).group()
             model = ""
             version = ""
             hostname = ""
@@ -90,8 +87,12 @@ def print_ubnt():
                 client = paramiko.SSHClient()
                 client.load_system_host_keys()
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                client.connect(ip, username=sshname, password=sshpass, allow_agent=False)
-                stdin, stdout, stderr = client.exec_command('mca-cli <<EOF\ninfo\nquit\nEOF')
+                client.connect(
+                    ip, username=sshname, password=sshpass, allow_agent=False
+                )
+                stdin, stdout, stderr = client.exec_command(
+                    "mca-cli <<EOF\ninfo\nquit\nEOF"
+                )
 
                 if stdout.channel.recv_exit_status() == 0:
                     for line in stdout:
@@ -102,29 +103,30 @@ def print_ubnt():
                         elif "Hostname" in line:
                             hostname = line.rsplit(None, 1)[-1]
                         elif "Status" in line or "Inform" in line:
-                            status = line.rsplit(None, 2)[-2] + " " + line.rsplit(None, 1)[-1]
+                            status = (
+                                line.rsplit(None, 2)[-2]
+                                + " "
+                                + line.rsplit(None, 1)[-1]
+                            )
 
                         if hostname == "":
-                            stdin, stdout, stderr = client.exec_command('uname -a')
+                            stdin, stdout, stderr = client.exec_command("uname -a")
                             for line in stdout:
                                 hostname = line.split(None, 2)[1]
 
-
                 else:
-                    stdin, stdout, stderr = client.exec_command('uname -a')
+                    stdin, stdout, stderr = client.exec_command("uname -a")
                     for line in stdout:
                         hostname = line.split(None, 2)[1]
 
-                    stdin, stdout, stderr = client.exec_command('cat /etc/version')
+                    stdin, stdout, stderr = client.exec_command("cat /etc/version")
                     for line in stdout:
-                        version = line.strip('\n')
+                        version = line.strip("\n")
 
-                    stdin, stdout, stderr = client.exec_command('cat /etc/board.info')
+                    stdin, stdout, stderr = client.exec_command("cat /etc/board.info")
                     for line in stdout:
                         if "board.name" in line:
-                            model = line.rsplit('=', 1)[-1].strip('\n')
-
-
+                            model = line.rsplit("=", 1)[-1].strip("\n")
 
                 client.close()
             except paramiko.AuthenticationException:
@@ -140,8 +142,11 @@ def print_ubnt():
 
             colorcount += 1
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--network", help="Make a ping sweep on subnet Eg. -n 10.0.0.0/24")
+parser.add_argument(
+    "-n", "--network", help="Make a ping sweep on subnet Eg. -n 10.0.0.0/24"
+)
 parser.add_argument("-u", "--user", help="Specify the SSH username")
 parser.add_argument("-p", "--password", help="Specify the SSH paswword")
 args = parser.parse_args()
