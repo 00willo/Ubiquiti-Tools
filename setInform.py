@@ -27,7 +27,7 @@ class bcolors:
     ENDC = '\033[0m'
 
 
-print "\nConnecting to devices....\n"
+print("\nConnecting to devices....\n")
 
 for ip in clients:
     try:
@@ -40,12 +40,12 @@ for ip in clients:
         if stdout.channel.recv_exit_status() == 0:
             for line in stdout:
                 if "Adoption request sent to" in line:
-                    print " %s[+] Adoption request sent to %s from %s %s" % (bcolors.OKGREEN, informAddr, ip, bcolors.ENDC)
+                    print(" %s[+] Adoption request sent to %s from %s %s" % (bcolors.OKGREEN, informAddr, ip, bcolors.ENDC))
         
         
     except paramiko.AuthenticationException:
-        print " %s[-] Authentication failed on %s!%s" % (bcolors.FAIL, ip, bcolors.ENDC)
+        print(" %s[-] Authentication failed on %s!%s" % (bcolors.FAIL, ip, bcolors.ENDC))
     except:
-        print " %s[-]Something went wrong on %s!%s" % (bcolors.FAIL, ip, bcolors.ENDC)
+        print(" %s[-]Something went wrong on %s!%s" % (bcolors.FAIL, ip, bcolors.ENDC))
    
-print
+print()
