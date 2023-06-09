@@ -1,0 +1,21 @@
+Issue
+
+
+(.venv) PS C:\Users\willo\OneDrive\Documents\Ubiquiti-Tools> python .\DiscoverUbiquiti.py -n 192.168.5.0/24
+Processing args
+Conducting arp scan
+
+Ubiquiti Devices
+
+IP               MAC                Model            Hostname           Version      Status
+
+Traceback (most recent call last):
+  File "C:\Users\willo\OneDrive\Documents\Ubiquiti-Tools\DiscoverUbiquiti.py", line 192, in <module>
+    print_ubnt(arps)
+  File "C:\Users\willo\OneDrive\Documents\Ubiquiti-Tools\DiscoverUbiquiti.py", line 100, in print_ubnt
+    ip = re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", device, re.I).group()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.1264.0_x64__qbz5n2kfra8p0\Lib\re\__init__.py", line 176, in search
+    return _compile(pattern, flags).search(string)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: expected string or bytes-like object, got 'tuple'

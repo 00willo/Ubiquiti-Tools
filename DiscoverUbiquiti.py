@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!C:\Users\willo\OneDrive\Documents\Ubiquiti-Tools\.venv\Scripts\python
+
+# usr/bin/env python
 
 # -------------------------------------------------------------------------------
 #  "THE BEER-WARE LICENSE" (Revision 42):
@@ -8,18 +10,25 @@
 #
 #     - Patrick Kerwood @ LinuxBloggen.dk
 # -------------------------------------------------------------------------------
+# Modified by Graham Williamson
 
-import paramiko
-import subprocess
 import argparse
+import paramiko
 import re
+import subprocess
 
-sshname = "admin"
-sshpass = "passw0rd"
+from datetime import datetime
+from scapy.all import srp,Ether,ARP,conf
 
-usw_flex_mini_mac_prefix = ["74:ac:b9",]
-uap_ac_iw_mac_prefix = ["78:45:58",]
-us_16_150w_mac_prefix = ["68:d7:9a",]
+usw_flex_mini_mac_prefix = [
+    "74:ac:b9",
+]
+uap_ac_iw_mac_prefix = [
+    "78:45:58",
+]
+us_16_150w_mac_prefix = [
+    "68:d7:9a",
+]
 
 macs_prefix = [
     "f0:9f:c2",
@@ -38,7 +47,12 @@ macs_prefix = [
     "b4:fb:e4",
 ]
 
-macs = mac_prefix + usw_flex_mini_mac_prefix + uap_ac_iw_mac_prefix + us_16_150w_mac_prefix
+macs = (
+    macs_prefix
+    + usw_flex_mini_mac_prefix
+    + uap_ac_iw_mac_prefix
+    + us_16_150w_mac_prefix
+)
 
 
 class bcolors:
@@ -48,42 +62,43 @@ class bcolors:
     HEADER = "\033[93m"
 
 
-def ping_sweep(network):
-    print()
-    print("Ping sweep in progress...")
-    nmap = subprocess.check_output("nmap -n -sP --send-ip %s" % network, shell=True)
+def arp_scan(ips):
+    start_time = datetime.now()
+    results = []
+    conf.verb = 0
+    eth_broadcast_frame = Ether(dst="ff:ff:ff:ff:ff:ff")
+    arp_frame = ARP(pdst = ips)
+    ans, unans = srp(eth_broadcast_frame/arp_frame,
+             timeout = 2,
+             #iface = interface,
+             inter = 0.1)
 
-    nsplit = []
-    nsplit = nmap.decode().split("\n")
-    for line in nsplit:
-        if "done" in line:
-            print(line)
+    for _,rcv in ans:
+        ip = rcv[1].psrc
+        mac = rcv[1].hwsrc
+        results.append((ip, mac))
+    return results
 
-
-def print_ubnt():
+def print_ubnt(arp_results):
     print()
     print("Ubiquiti Devices\n")
-
-    arp = subprocess.check_output("arp -a", shell=True)
-
-    splitted = []
-    splitted = arp.decode().split("\n")
+    #import ipdb;ipdb.set_trace()
 
     FORMAT = "%-16s %-18s %-16s %-18s %-12s %-45s"
     print(FORMAT % ("IP", "MAC", "Model", "Hostname", "Version", "Status"))
 
     colorcount = 1
 
-    for line in splitted:
+    for device in arp_results:
         bool = False
 
         for mac in macs:
-            if mac in line:
+            if mac in device[1]:
                 bool = True
 
         if bool:
-            ip = re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", line, re.I).group()
-            mac = re.search(r"([0-9A-F]{2}[:-]){5}([0-9A-F]{2})", line, re.I).group()
+            ip = re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", device, re.I).group()
+            mac = re.search(r"([0-9A-F]{2}[:-]){5}([0-9A-F]{2})", device, re.I).group()
             model = ""
             version = ""
             hostname = ""
@@ -151,21 +166,28 @@ def print_ubnt():
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-n", "--network", help="Make a ping sweep on subnet Eg. -n 10.0.0.0/24"
+    "-n", "--network", required=True, help="Make a ping sweep on subnet Eg. -n 10.0.0.0/24"
 )
-parser.add_argument("-u", "--user", help="Specify the SSH username")
-parser.add_argument("-p", "--password", help="Specify the SSH paswword")
+parser.add_argument(
+    "-c",
+    "--connect",
+    help="Specify the SSH username",
+    default=False,
+    action="store_true",
+)
+parser.add_argument("-u", "--user", help="Specify the SSH username", default="ubnt")
+parser.add_argument("-p", "--password", help="Specify the SSH paswword", default="ubnt")
 args = parser.parse_args()
 
+print("Processing args")
 if args.network:
-    ping_sweep(args.network)
+    #ping_sweep(args.network)
+    print("Conducting arp scan")
+    arps = arp_scan(args.network)
 
-if args.user:
+if args.connect:
     sshname = args.user
-
-if args.password:
     sshpass = args.password
 
-
-print_ubnt()
+print_ubnt(arps)
 print()
